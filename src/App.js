@@ -1,26 +1,45 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import { getGlobalCase } from './api/index';
+import styled, { createGlobalStyle } from 'styled-components';
+import { HandLoading } from './Components/Loading';
+
+const GlobalStyle = createGlobalStyle`
+  body {
+   background: #6363e2;
+  }
+`;
+
+const CardList = React.lazy(() => import('./Components/CardList'));
+
+const Container = styled.div`
+   margin: 18px;
+`;
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+   const [globalCase, setGlobalCase] = useState([]);
+
+   useEffect(() => {
+      fetchData();
+   }, []);
+
+   async function fetchData() {
+      const data = await getGlobalCase();
+      delete data['lastUpdate'];
+      setGlobalCase(data);
+   }
+
+   return (
+      <React.Fragment>
+         <GlobalStyle />
+         <Container>
+            <React.Suspense fallback={<HandLoading />}>
+               {Object.keys(globalCase).map((value) => (
+                  <CardList value={value} key={value} globalCase={globalCase} />
+               ))}
+            </React.Suspense>
+         </Container>
+      </React.Fragment>
+   );
 }
 
 export default App;
